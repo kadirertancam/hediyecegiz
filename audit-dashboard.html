@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Hediyeceyiz SEO Denetim Dashboard'u - Kapsamlı SEO analizi, teknik incelemeler, içerik analizi ve öneriler">
+    <title>SEO Denetim Dashboard - Hediyeceyiz</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --secondary: #ec4899;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --gray: #64748b;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark);
+            color: white;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+            animation: bgMove 20s ease-in-out infinite;
+        }
+
+        @keyframes bgMove {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(-50px, -50px) rotate(180deg); }
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1rem 0;
+            z-index: 1000;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        nav a:hover {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        /* Main Container */
+        main {
+            padding-top: 100px;
+            padding-bottom: 4rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Page Header */
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-header h1 {
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .page-header p {
+            font-size: 1.2rem;
+            color: var(--gray);
+        }
+
+        .audit-url {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(99, 102, 241, 0.1);
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            margin-top: 1rem;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .audit-url input {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            min-width: 300px;
+        }
+
+        .btn-audit {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .btn-audit:hover {
+            transform: scale(1.05);
+        }
+
+        /* Loading Spinner */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(99, 102, 241, 0.1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Dashboard Grid */
+        .dashboard {
+            display: none;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        /* Score Card */
+        .score-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 3rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .score-circle {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 2rem;
+            position: relative;
+        }
+
+        .score-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .score-label {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--gray);
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 20px 60px rgba(99, 102, 241, 0.3);
+        }
+
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        .metric-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-change {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .metric-change.positive {
+            color: var(--success);
+        }
+
+        .metric-change.negative {
+            color: var(--danger);
+        }
+
+        /* Section */
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .section-score {
+            font-size: 2rem;
+            font-weight: 800;
+            padding: 0.5rem 1.5rem;
+            border-radius: 12px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-item {
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .stat-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .badge-good {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        /* Table */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            font-weight: 600;
+            color: var(--gray);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .data-table tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            margin: 2rem 0;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            min-height: 300px;
+        }
+
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 250px;
+            gap: 1rem;
+        }
+
+        .bar {
+            flex: 1;
+            max-width: 80px;
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .bar:hover {
+            opacity: 0.8;
+            transform: translateY(-5px);
+        }
+
+        .bar-label {
+            position: absolute;
+            bottom: -30px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--gray);
+        }
+
+        .bar-value {
+            position: absolute;
+            top: -25px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        /* Recommendations */
+        .recommendations-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .recommendation-item {
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border-left: 4px solid var(--primary);
+            transition: all 0.3s;
+        }
+
+        .recommendation-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateX(5px);
+        }
+
+        .recommendation-item.critical {
+            border-left-color: var(--danger);
+        }
+
+        .recommendation-item.warning {
+            border-left-color: var(--warning);
+        }
+
+        .recommendation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .recommendation-category {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .priority-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .priority-high {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .priority-medium {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .priority-low {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary);
+        }
+
+        .recommendation-issue {
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .recommendation-suggestion {
+            color: white;
+            line-height: 1.6;
+        }
+
+        /* Competitor Card */
+        .competitor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .competitor-card {
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+        }
+
+        .competitor-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+        }
+
+        .competitor-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .competitor-url {
+            color: var(--gray);
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        .competitor-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        .competitor-metric {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .competitor-metric-label {
+            font-size: 0.75rem;
+            color: var(--gray);
+        }
+
+        .competitor-metric-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        /* Core Web Vitals */
+        .vitals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .vital-item {
+            text-align: center;
+            padding: 1.5rem 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 2px solid;
+        }
+
+        .vital-item.good {
+            border-color: var(--success);
+        }
+
+        .vital-item.needs-improvement {
+            border-color: var(--warning);
+        }
+
+        .vital-item.poor {
+            border-color: var(--danger);
+        }
+
+        .vital-label {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .vital-value {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+        }
+
+        .vital-unit {
+            font-size: 0.75rem;
+            color: var(--gray);
+        }
+
+        .vital-rating {
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-header h1 {
+                font-size: 2rem;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .competitor-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .vitals-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .section {
+                padding: 1.5rem;
+            }
+
+            .data-table {
+                font-size: 0.85rem;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 0.75rem 0.5rem;
+            }
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 1rem 2rem;
+            background: transparent;
+            border: none;
+            color: var(--gray);
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            color: white;
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+
+    <header>
+        <div class="nav-container">
+            <div class="logo-area">
+                <a href="/" class="logo">Hediyeceyiz</a>
+            </div>
+            <nav>
+                <a href="/">Ana Sayfa</a>
+                <a href="/audit-dashboard.html">SEO Dashboard</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1>SEO Denetim Dashboard</h1>
+                <p>Kapsamlı SEO analizi ve performans metrikleri</p>
+                <div class="audit-url">
+                    <span>🔍</span>
+                    <input type="url" id="urlInput" placeholder="https://hediyeceyiz.netlify.app" value="https://hediyeceyiz.netlify.app">
+                    <button class="btn-audit" onclick="runAudit()">Analiz Başlat</button>
+                </div>
+            </div>
+
+            <!-- Loading -->
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>SEO analizi yapılıyor...</p>
+            </div>
+
+            <!-- Dashboard -->
+            <div class="dashboard" id="dashboard">
+                <!-- Overall Score -->
+                <div class="score-card">
+                    <div class="score-circle">
+                        <svg width="200" height="200" style="transform: rotate(-90deg)">
+                            <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="12"/>
+                            <circle id="scoreCircle" cx="100" cy="100" r="90" fill="none" stroke="url(#gradient)" stroke-width="12" stroke-linecap="round" stroke-dasharray="565.48" stroke-dashoffset="565.48"/>
+                            <defs>
+                                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#6366f1"/>
+                                    <stop offset="100%" style="stop-color:#ec4899"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <div class="score-value" id="overallScore">0</div>
+                    </div>
+                    <div class="score-label">Genel SEO Skoru</div>
+                </div>
+
+                <!-- Key Metrics -->
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-label">Domain Authority</span>
+                            <div class="metric-icon" style="background: rgba(99, 102, 241, 0.2);">📊</div>
+                        </div>
+                        <div class="metric-value" id="domainAuthority">0</div>
+                        <div class="metric-change positive" id="daChange">+0%</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-label">Aylık Organik Trafik</span>
+                            <div class="metric-icon" style="background: rgba(236, 72, 153, 0.2);">📈</div>
+                        </div>
+                        <div class="metric-value" id="organicTraffic">0</div>
+                        <div class="metric-change positive" id="trafficChange">+0%</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-label">Toplam Backlink</span>
+                            <div class="metric-icon" style="background: rgba(16, 185, 129, 0.2);">🔗</div>
+                        </div>
+                        <div class="metric-value" id="totalBacklinks">0</div>
+                        <div class="metric-change" id="backlinksChange">0 domain</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-label">Page Authority</span>
+                            <div class="metric-icon" style="background: rgba(245, 158, 11, 0.2);">⭐</div>
+                        </div>
+                        <div class="metric-value" id="pageAuthority">0</div>
+                        <div class="metric-change" id="paChange">0 sayfa</div>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('overview')">Genel Bakış</button>
+                    <button class="tab" onclick="switchTab('technical')">Teknik SEO</button>
+                    <button class="tab" onclick="switchTab('content')">İçerik Analizi</button>
+                    <button class="tab" onclick="switchTab('backlinks')">Backlink Analizi</button>
+                    <button class="tab" onclick="switchTab('competitors')">Rakip Analizi</button>
+                    <button class="tab" onclick="switchTab('recommendations')">Öneriler</button>
+                </div>
+
+                <!-- Overview Tab -->
+                <div class="tab-content active" id="overview-tab">
+                    <!-- Homepage Analysis -->
+                    <div class="section">
+                        <div class="section-header">
+                            <h2 class="section-title">Ana Sayfa Analizi</h2>
+                            <div class="section-score" id="homepageScore">0/100</div>
+                        </div>
+
+                        <div class="stats-grid" id="homepageStats"></div>
+                    </div>
+
+                    <!-- Core Web Vitals -->
+                    <div class="section">
+                        <div class="section-header">
+                            <h2 class="section-title">Core Web Vitals</h2>
+                        </div>
+
+                        <div class="vitals-grid" id="webVitals"></div>
+                    </div>
+
+                    <!-- Top Keywords -->
+                    <div class="section">
+                        <div class="section-header">
+                            <h2 class="section-title">En Performanslı Anahtar Kelimeler</h2>
+                        </div>
+
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Anahtar Kelime</th>
+                                    <th>Pozisyon</th>
+                                    <th>Arama Hacmi</th>
+                                    <th>Trafik</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topKeywords"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Technical SEO Tab -->
+                <div class="tab-content" id="technical-tab">
+                    <!-- Meta Tags -->
+                    <div class="section">
+                        <div class="section-header">
+                            <h2 class="section-title">Meta Etiketler & Başlıklar</h2>
+                        </div>
+
+                        <div id="metaAnalysis"></div>
+                    </div>
+
+                    <!-- Technical Elements -->
+                    <div class="section">
+                        <div class="section-header">
+                            <h2 class="section-title">Teknik Öğeler</h2>
+                        </div>
+
+                        <div class="stats-grid" id="technicalElements"></div>
+                    </div>
+
+                    <!-- Page Speed -->
+                    <div class="section">
+                        <div class="section-header">
+                            <h2 class="section-title">Sayfa Hızı Metrikleri</h2>
+                        </div>
+
+                        <div class="stats-grid" id="speedMetrics"></div>
+                    </div>
+                </div>
+
+                <!-- Content Analysis Tab -->
+                <div class="tab-content" id="content-tab">
+                    <!-- Keyword Density -->
+                    <div class="section">
+                        <div class="section-header">
+                            <h2 class="section-title">Anahtar Kelime Yoğunluğu</h2>
+                        </div>
+
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Anahtar Kelime</th>
+                                    <th>Yoğunluk</th>
+                                    <th>Kullanım</th>
+                                    <th>Önem</th>
+                                </tr>
+                            </thead>
+                            <tbody id="keywordDensity"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- Content Quality -->
+                    <div class="section">
+                        <div class="section-header">
+                            <h2 class="section-title">İçerik Kalitesi</h2>
+                        </div>
+
+                        <div class="stats-grid" id="contentQuality"></div>
+                    </div>
+
+                    <!-- Readability -->
+                    <div class="section">
+                        <div class="section-header">
+                            <h2 class="section-title">Okunabilirlik Analizi</h2>
+                            <div class="section-score" id="readabilityScore">0/100</div>
+                        </div>
+
+                        <div class="stats-grid" id="readabilityStats"></div>
+                    </div>
+                </div>
+
+                <!-- Backlinks Tab -->
+                <div class="tab-content" id="backlinks-tab">
+                    <!-- Backlink Overview -->
+                    <div class="section">
+                        <div class="section-header">
+                            <h2 class="section-title">Backlink Özeti</h2>
+                        </div>
+
+                        <div class="stats-grid" id="backlinkOverview"></div>
+                    </div>
+
+                    <!-- Top Backlinks -->
+                    <div class="section">
+                        <div class="section-header">
+                            <h2 class="section-title">En Güçlü Backlink'ler</h2>
+                        </div>
+
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Domain</th>
+                                    <th>DA</th>
+                                    <th>Anchor Text</th>
+                                    <th>Tip</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topBacklinks"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- Referring Domains -->
+                    <div class="section">
+                        <div class="section-header">
+                            <h2 class="section-title">En Çok Yönlendiren Domainler</h2>
+                        </div>
+
+                        <div class="chart-container">
+                            <div class="bar-chart" id="referringDomainsChart"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Competitors Tab -->
+                <div class="tab-content" id="competitors-tab">
+                    <div class="section">
+                        <div class="section-header">
+                            <h2 class="section-title">Rakip Karşılaştırması</h2>
+                        </div>
+
+                        <div class="competitor-grid" id="competitorGrid"></div>
+                    </div>
+                </div>
+
+                <!-- Recommendations Tab -->
+                <div class="tab-content" id="recommendations-tab">
+                    <!-- Critical Issues -->
+                    <div class="section">
+                        <div class="section-header">
+                            <h2 class="section-title">🚨 Kritik Sorunlar</h2>
+                        </div>
+
+                        <div class="recommendations-list" id="criticalIssues"></div>
+                    </div>
+
+                    <!-- Technical Recommendations -->
+                    <div class="section">
+                        <div class="section-header">
+                            <h2 class="section-title">⚙️ Teknik Öneriler</h2>
+                        </div>
+
+                        <div class="recommendations-list" id="technicalRecs"></div>
+                    </div>
+
+                    <!-- Content Recommendations -->
+                    <div class="section">
+                        <div class="section-header">
+                            <h2 class="section-title">✍️ İçerik Önerileri</h2>
+                        </div>
+
+                        <div class="recommendations-list" id="contentRecs"></div>
+                    </div>
+
+                    <!-- Link Building -->
+                    <div class="section">
+                        <div class="section-header">
+                            <h2 class="section-title">🔗 Link Building Önerileri</h2>
+                        </div>
+
+                        <div class="recommendations-list" id="linkRecs"></div>
+                    </div>
+
+                    <!-- UX Recommendations -->
+                    <div class="section">
+                        <div class="section-header">
+                            <h2 class="section-title">🎨 UX Önerileri</h2>
+                        </div>
+
+                        <div class="recommendations-list" id="uxRecs"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let auditData = null;
+
+        // Run audit on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            runAudit();
+        });
+
+        async function runAudit() {
+            const url = document.getElementById('urlInput').value;
+            const loading = document.getElementById('loading');
+            const dashboard = document.getElementById('dashboard');
+
+            loading.classList.add('active');
+            dashboard.classList.remove('active');
+
+            try {
+                const response = await fetch(`/.netlify/functions/seo-audit?url=${encodeURIComponent(url)}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    auditData = result.data;
+                    populateDashboard(auditData);
+                    loading.classList.remove('active');
+                    dashboard.classList.add('active');
+                }
+            } catch (error) {
+                console.error('Audit error:', error);
+                alert('SEO analizi sırasında bir hata oluştu. Lütfen tekrar deneyin.');
+                loading.classList.remove('active');
+            }
+        }
+
+        function populateDashboard(data) {
+            // Overall Score
+            animateScore(data.overallScore);
+
+            // Key Metrics
+            document.getElementById('domainAuthority').textContent = data.backlinks.domainAuthority;
+            document.getElementById('organicTraffic').textContent = data.traffic.organicTraffic.monthly.toLocaleString();
+            document.getElementById('totalBacklinks').textContent = data.backlinks.totalBacklinks.toLocaleString();
+            document.getElementById('pageAuthority').textContent = data.backlinks.pageAuthority;
+
+            document.getElementById('trafficChange').textContent = `+${data.traffic.organicTraffic.change}%`;
+            document.getElementById('backlinksChange').textContent = `${data.backlinks.referringDomains} domain`;
+            document.getElementById('paChange').textContent = `${data.traffic.topPages.length} sayfa`;
+
+            // Homepage Analysis
+            const avgHomepageScore = Math.round(
+                (data.homepage.structure.score + data.homepage.speed.score +
+                 data.homepage.mobile.score + data.homepage.ux.score) / 4
+            );
+            document.getElementById('homepageScore').textContent = `${avgHomepageScore}/100`;
+
+            const homepageStats = document.getElementById('homepageStats');
+            homepageStats.innerHTML = `
+                <div class="stat-item">
+                    <div class="stat-label">Yapı Skoru</div>
+                    <div class="stat-value">${data.homepage.structure.score}/100 <span class="stat-badge badge-good">İyi</span></div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Hız Skoru</div>
+                    <div class="stat-value">${data.homepage.speed.score}/100 <span class="stat-badge badge-warning">Orta</span></div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Mobil Uyumluluk</div>
+                    <div class="stat-value">${data.homepage.mobile.score}/100 <span class="stat-badge badge-good">İyi</span></div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Kullanıcı Deneyimi</div>
+                    <div class="stat-value">${data.homepage.ux.score}/100 <span class="stat-badge badge-good">İyi</span></div>
+                </div>
+            `;
+
+            // Core Web Vitals
+            const webVitals = document.getElementById('webVitals');
+            webVitals.innerHTML = '';
+
+            const vitals = [
+                { label: 'LCP', value: data.coreWebVitals.lcp.value, unit: 's', rating: data.coreWebVitals.lcp.rating },
+                { label: 'FID', value: data.coreWebVitals.fid.value, unit: 'ms', rating: data.coreWebVitals.fid.rating },
+                { label: 'CLS', value: data.coreWebVitals.cls.value, unit: '', rating: data.coreWebVitals.cls.rating },
+                { label: 'FCP', value: data.coreWebVitals.fcp.value, unit: 's', rating: data.coreWebVitals.fcp.rating },
+                { label: 'TTFB', value: data.coreWebVitals.ttfb.value, unit: 's', rating: data.coreWebVitals.ttfb.rating },
+                { label: 'INP', value: data.coreWebVitals.inp.value, unit: 'ms', rating: data.coreWebVitals.inp.rating }
+            ];
+
+            vitals.forEach(vital => {
+                const ratingClass = vital.rating.replace('-', '');
+                webVitals.innerHTML += `
+                    <div class="vital-item ${ratingClass}">
+                        <div class="vital-label">${vital.label}</div>
+                        <div class="vital-value">${vital.value}<span class="vital-unit">${vital.unit}</span></div>
+                        <div class="vital-rating">${vital.rating === 'good' ? '✓ İyi' : vital.rating === 'needs-improvement' ? '⚠ Orta' : '✗ Zayıf'}</div>
+                    </div>
+                `;
+            });
+
+            // Top Keywords
+            const topKeywords = document.getElementById('topKeywords');
+            topKeywords.innerHTML = '';
+            data.traffic.topKeywords.forEach(kw => {
+                topKeywords.innerHTML += `
+                    <tr>
+                        <td>${kw.keyword}</td>
+                        <td><strong>#${kw.position}</strong></td>
+                        <td>${kw.volume.toLocaleString()}/ay</td>
+                        <td>${kw.traffic}</td>
+                    </tr>
+                `;
+            });
+
+            // Meta Analysis
+            const metaAnalysis = document.getElementById('metaAnalysis');
+            metaAnalysis.innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">Title Tag</div>
+                        <div class="stat-value">${data.technical.meta.title.exists ? '✓' : '✗'} ${data.technical.meta.title.length} karakter
+                            <span class="stat-badge ${data.technical.meta.title.quality === 'good' ? 'badge-good' : 'badge-warning'}">${data.technical.meta.title.quality}</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Meta Description</div>
+                        <div class="stat-value">${data.technical.meta.description.exists ? '✓' : '✗'} ${data.technical.meta.description.length} karakter
+                            <span class="stat-badge ${data.technical.meta.description.quality === 'good' ? 'badge-good' : 'badge-danger'}">${data.technical.meta.description.quality}</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">H1 Etiketleri</div>
+                        <div class="stat-value">${data.technical.headings.h1.count} adet <span class="stat-badge badge-good">${data.technical.headings.h1.quality}</span></div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Heading Hiyerarşisi</div>
+                        <div class="stat-value">H1: ${data.technical.headings.h1.count}, H2: ${data.technical.headings.h2.count}, H3: ${data.technical.headings.h3.count}</div>
+                    </div>
+                </div>
+            `;
+
+            // Technical Elements
+            const technicalElements = document.getElementById('technicalElements');
+            technicalElements.innerHTML = `
+                <div class="stat-item">
+                    <div class="stat-label">Sitemap</div>
+                    <div class="stat-value">${data.technical.sitemap.exists ? '✓ Var' : '✗ Yok'} <span class="stat-badge badge-good">${data.technical.sitemap.urlCount} URL</span></div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Robots.txt</div>
+                    <div class="stat-value">${data.technical.robots.exists ? '✓ Var' : '✗ Yok'} <span class="stat-badge badge-good">Geçerli</span></div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">SSL Sertifikası</div>
+                    <div class="stat-value">${data.technical.ssl.enabled ? '✓ Aktif' : '✗ Yok'} <span class="stat-badge badge-good">${data.technical.ssl.expiryDays} gün</span></div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Canonical Tag</div>
+                    <div class="stat-value">${data.technical.canonical.exists ? '✓ Var' : '✗ Yok'} <span class="stat-badge badge-danger">Eksik</span></div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Alt Etiketleri</div>
+                    <div class="stat-value">${data.technical.images.withAlt}/${data.technical.images.totalImages} <span class="stat-badge badge-warning">%${data.technical.images.altCoverage}</span></div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Open Graph</div>
+                    <div class="stat-value">${data.technical.meta.ogTags.exists ? '✓ Var' : '✗ Yok'} <span class="stat-badge badge-danger">Eksik</span></div>
+                </div>
+            `;
+
+            // Speed Metrics
+            const speedMetrics = document.getElementById('speedMetrics');
+            speedMetrics.innerHTML = `
+                <div class="stat-item">
+                    <div class="stat-label">Yüklenme Süresi</div>
+                    <div class="stat-value">${data.homepage.speed.loadTime}s <span class="stat-badge badge-good">İyi</span></div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">First Contentful Paint</div>
+                    <div class="stat-value">${data.homepage.speed.firstContentfulPaint}s <span class="stat-badge badge-good">İyi</span></div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Time to Interactive</div>
+                    <div class="stat-value">${data.homepage.speed.timeToInteractive}s <span class="stat-badge badge-warning">Orta</span></div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Speed Index</div>
+                    <div class="stat-value">${data.homepage.speed.speedIndex}s <span class="stat-badge badge-good">İyi</span></div>
+                </div>
+            `;
+
+            // Keyword Density
+            const keywordDensity = document.getElementById('keywordDensity');
+            keywordDensity.innerHTML = '';
+            data.content.keywords.forEach(kw => {
+                keywordDensity.innerHTML += `
+                    <tr>
+                        <td><strong>${kw.keyword}</strong></td>
+                        <td>${kw.density}%</td>
+                        <td>${kw.count} kez</td>
+                        <td><span class="stat-badge ${kw.prominence === 'high' ? 'badge-good' : kw.prominence === 'medium' ? 'badge-warning' : 'badge-danger'}">${kw.prominence}</span></td>
+                    </tr>
+                `;
+            });
+
+            // Content Quality
+            const contentQuality = document.getElementById('contentQuality');
+            contentQuality.innerHTML = `
+                <div class="stat-item">
+                    <div class="stat-label">Kelime Sayısı</div>
+                    <div class="stat-value">${data.content.length.wordCount} <span class="stat-badge badge-warning">${data.content.length.quality}</span></div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Karakter Sayısı</div>
+                    <div class="stat-value">${data.content.length.characterCount.toLocaleString()}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">İç Linkler</div>
+                    <div class="stat-value">${data.content.internalLinks.total} <span class="stat-badge badge-good">${data.content.internalLinks.quality}</span></div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Dış Linkler</div>
+                    <div class="stat-value">${data.content.externalLinks.total} <span class="stat-badge badge-good">${data.content.externalLinks.quality}</span></div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Yinelenen İçerik</div>
+                    <div class="stat-value">${data.content.duplicateContent.found ? 'Var' : 'Yok'} <span class="stat-badge badge-good">Temiz</span></div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Okuma Süresi</div>
+                    <div class="stat-value">${data.content.readability.readingTime}</div>
+                </div>
+            `;
+
+            // Readability
+            document.getElementById('readabilityScore').textContent = `${data.content.readability.score}/100`;
+            const readabilityStats = document.getElementById('readabilityStats');
+            readabilityStats.innerHTML = `
+                <div class="stat-item">
+                    <div class="stat-label">Seviye</div>
+                    <div class="stat-value">${data.content.readability.level}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Ortalama Cümle Uzunluğu</div>
+                    <div class="stat-value">${data.content.readability.avgSentenceLength} kelime</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Ortalama Kelime Uzunluğu</div>
+                    <div class="stat-value">${data.content.readability.avgWordLength} harf</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Karmaşık Kelimeler</div>
+                    <div class="stat-value">${data.content.readability.complexWords}</div>
+                </div>
+            `;
+
+            // Backlink Overview
+            const backlinkOverview = document.getElementById('backlinkOverview');
+            backlinkOverview.innerHTML = `
+                <div class="stat-item">
+                    <div class="stat-label">Toplam Backlink</div>
+                    <div class="stat-value">${data.backlinks.totalBacklinks.toLocaleString()}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Yönlendiren Domain</div>
+                    <div class="stat-value">${data.backlinks.referringDomains}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Dofollow</div>
+                    <div class="stat-value">${data.backlinks.dofollowBacklinks} <span class="stat-badge badge-good">${Math.round(data.backlinks.dofollowBacklinks/data.backlinks.totalBacklinks*100)}%</span></div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Nofollow</div>
+                    <div class="stat-value">${data.backlinks.nofollowBacklinks} <span class="stat-badge badge-warning">${Math.round(data.backlinks.nofollowBacklinks/data.backlinks.totalBacklinks*100)}%</span></div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Yüksek Kalite</div>
+                    <div class="stat-value">${data.backlinks.quality.high} <span class="stat-badge badge-good">DA 50+</span></div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Trust Flow</div>
+                    <div class="stat-value">${data.backlinks.trustFlow}</div>
+                </div>
+            `;
+
+            // Top Backlinks
+            const topBacklinks = document.getElementById('topBacklinks');
+            topBacklinks.innerHTML = '';
+            data.backlinks.topBacklinks.forEach(bl => {
+                topBacklinks.innerHTML += `
+                    <tr>
+                        <td>${bl.domain}</td>
+                        <td><strong>${bl.da}</strong></td>
+                        <td>${bl.anchor}</td>
+                        <td><span class="stat-badge ${bl.type === 'dofollow' ? 'badge-good' : 'badge-warning'}">${bl.type}</span></td>
+                    </tr>
+                `;
+            });
+
+            // Referring Domains Chart
+            const referringDomainsChart = document.getElementById('referringDomainsChart');
+            referringDomainsChart.innerHTML = '';
+            const maxBacklinks = Math.max(...data.backlinks.topReferringDomains.map(d => d.backlinks));
+            data.backlinks.topReferringDomains.forEach(domain => {
+                const height = (domain.backlinks / maxBacklinks) * 100;
+                referringDomainsChart.innerHTML += `
+                    <div class="bar" style="height: ${height}%">
+                        <div class="bar-value">${domain.backlinks}</div>
+                        <div class="bar-label">${domain.domain}</div>
+                    </div>
+                `;
+            });
+
+            // Competitors
+            const competitorGrid = document.getElementById('competitorGrid');
+            competitorGrid.innerHTML = '';
+            data.competitors.forEach(comp => {
+                competitorGrid.innerHTML += `
+                    <div class="competitor-card">
+                        <div class="competitor-name">${comp.name}</div>
+                        <div class="competitor-url">${comp.url}</div>
+                        <div class="competitor-metrics">
+                            <div class="competitor-metric">
+                                <span class="competitor-metric-label">DA</span>
+                                <span class="competitor-metric-value">${comp.da}</span>
+                            </div>
+                            <div class="competitor-metric">
+                                <span class="competitor-metric-label">SEO Skoru</span>
+                                <span class="competitor-metric-value">${comp.seoScore}</span>
+                            </div>
+                            <div class="competitor-metric">
+                                <span class="competitor-metric-label">Trafik</span>
+                                <span class="competitor-metric-value">${comp.organicTraffic.toLocaleString()}</span>
+                            </div>
+                            <div class="competitor-metric">
+                                <span class="competitor-metric-label">Backlinks</span>
+                                <span class="competitor-metric-value">${comp.backlinks}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Recommendations
+            populateRecommendations(data.recommendations);
+        }
+
+        function populateRecommendations(recs) {
+            const criticalIssues = document.getElementById('criticalIssues');
+            criticalIssues.innerHTML = '';
+            recs.critical.forEach(rec => {
+                criticalIssues.innerHTML += createRecommendationHTML(rec, true);
+            });
+
+            const technicalRecs = document.getElementById('technicalRecs');
+            technicalRecs.innerHTML = '';
+            recs.technical.forEach(rec => {
+                technicalRecs.innerHTML += createRecommendationHTML(rec);
+            });
+
+            const contentRecs = document.getElementById('contentRecs');
+            contentRecs.innerHTML = '';
+            recs.content.forEach(rec => {
+                contentRecs.innerHTML += createRecommendationHTML(rec);
+            });
+
+            const linkRecs = document.getElementById('linkRecs');
+            linkRecs.innerHTML = '';
+            recs.linkBuilding.forEach(rec => {
+                linkRecs.innerHTML += createRecommendationHTML(rec);
+            });
+
+            const uxRecs = document.getElementById('uxRecs');
+            uxRecs.innerHTML = '';
+            recs.ux.forEach(rec => {
+                uxRecs.innerHTML += createRecommendationHTML(rec);
+            });
+        }
+
+        function createRecommendationHTML(rec, isCritical = false) {
+            return `
+                <div class="recommendation-item ${isCritical ? 'critical' : rec.priority === 'medium' ? 'warning' : ''}">
+                    <div class="recommendation-header">
+                        <div class="recommendation-category">${rec.category}</div>
+                        <span class="priority-badge priority-${rec.priority}">${rec.priority}</span>
+                    </div>
+                    <div class="recommendation-issue">❌ ${rec.issue}</div>
+                    <div class="recommendation-suggestion">💡 ${rec.suggestion}</div>
+                </div>
+            `;
+        }
+
+        function animateScore(score) {
+            const scoreValue = document.getElementById('overallScore');
+            const scoreCircle = document.getElementById('scoreCircle');
+            const circumference = 2 * Math.PI * 90;
+            const offset = circumference - (score / 100) * circumference;
+
+            let current = 0;
+            const increment = score / 50;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= score) {
+                    current = score;
+                    clearInterval(timer);
+                }
+                scoreValue.textContent = Math.round(current);
+            }, 30);
+
+            setTimeout(() => {
+                scoreCircle.style.transition = 'stroke-dashoffset 2s ease';
+                scoreCircle.style.strokeDashoffset = offset;
+            }, 100);
+        }
+
+        function switchTab(tabName) {
+            // Remove active class from all tabs and contents
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            // Add active class to selected tab and content
+            event.target.classList.add('active');
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+        }
+    </script>
+</body>
+</html>
